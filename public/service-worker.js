@@ -1,10 +1,12 @@
 const FILES_TO_CACHE = [
     "/",
     "/index.html",
-    "manifest.webmanifest",
+    "/manifest.webmanifest",
+    "/index.js",
+    "/db.js",
     "/styles.css",
     "/icons/icon-192x192.png",
-    "/icons/icon-512x512.png"
+    "/icons/icon-512x512.png",
 ];
 
 const CACHE_NAME = "static-cache-v2";
@@ -31,7 +33,7 @@ self.addEventListener("activate", function (evt) {
                         return caches.delete(key);
                     }
                 })
-            );
+            )
         })
     );
 
@@ -42,7 +44,7 @@ self.addEventListener("fetch", function (evt) {
     if (evt.request.url.includes("/api/")) {
         evt.respondWith(
             caches.open(DATA_CACHE_NAME).then(cache => {
-                return fetch(evt.request)
+                fetch(evt.request)
                     .then(response => {
                         if (response.status === 200) {
                             cache.put(evt.request.url, response.clone());
@@ -51,7 +53,7 @@ self.addEventListener("fetch", function (evt) {
                         return response;
                     })
                     .catch(err => {
-                        return cache.match(evt.request);
+                        cache.match(evt.request);
                     });
             }).catch(err => console.log(err))
         );
@@ -60,11 +62,9 @@ self.addEventListener("fetch", function (evt) {
     }
 
     evt.respondWith(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.match(evt.request).then(response => {
-                return response || fetch(evt.request);
-            });
-        })
+        caches.open(CACHE_NAME).then(cache =>
+            cache.match(evt.request).then(response => 
+                response || fetch(evt.request))
+        )
     );
-
 });
